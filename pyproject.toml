@@ -1,0 +1,39 @@
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[project]
+name = "thilipipe"
+version = "0.1.0"
+description = "The system around a recommendation model — services, orchestrator, batch job, and the failures they introduce."
+readme = "README.md"
+license = "MIT"
+requires-python = ">=3.10"
+authors = [{ name = "thili.ai" }]
+keywords = ["recsys", "retrieval", "production-ml", "microservices", "serving"]
+classifiers = [
+  "Programming Language :: Python :: 3",
+  "License :: OSI Approved :: MIT License",
+  "Intended Audience :: Education",
+  "Topic :: Scientific/Engineering :: Artificial Intelligence",
+]
+dependencies = [
+  "numpy>=1.24",
+  "pandas>=2.0",
+  "torch>=2.0",
+  "fastapi>=0.110",
+  "uvicorn>=0.27",
+  "httpx>=0.27",
+  "pydantic>=2.0",
+]
+
+[project.optional-dependencies]
+dev = ["pytest>=7"]
+
+[project.urls]
+Homepage = "https://github.com/thili-ai/thilipipe"
+Repository = "https://github.com/thili-ai/thilipipe"
+"Learn Fast course" = "https://learnfast.thili.ai"
+
+[tool.hatch.build.targets.wheel]
+packages = ["thilipipe"]

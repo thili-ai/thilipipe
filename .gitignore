@@ -1,0 +1,27 @@
+# secrets — never commit
+.env
+*credentials*.json
+token.json
+service-account*.json
+client_secret*.json
+
+# generated artifacts + data
+state/
+data/
+*.npy
+*.pt
+*.zip
+
+# python
+__pycache__/
+*.py[cod]
+.venv/
+venv/
+dist/
+build/
+*.egg-info/
+.pytest_cache/
+.ipynb_checkpoints/
+
+# os
+.DS_Store
