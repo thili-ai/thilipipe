@@ -75,7 +75,8 @@ def recommend(user_id: int, k: int = 10, n_candidates: int = 200) -> dict:
     # if worse — recommendation. Which of those to serve is the policy decision.
     ranked, t = None, time.perf_counter()
     try:
-        r = _client.post(f"{RANK}/rank", json={"ranker_row": feat["ranker_row"], "items": items})
+        r = _client.post(f"{RANK}/rank", json={"ranker_row": feat["ranker_row"],
+                                               "items": items, "user_id": user_id})
         if r.status_code == 200:
             ranked = r.json()["items"]
         else:

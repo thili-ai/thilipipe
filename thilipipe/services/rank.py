@@ -8,8 +8,8 @@ the two-tower drill already found it barely helps at 50 candidates and hurts at 
 
 from __future__ import annotations
 
+import hashlib
 import json
-import random
 
 import numpy as np
 import torch
@@ -30,9 +30,24 @@ NET.load_state_dict(torch.load(S / "ranker.pt", map_location="cpu"))
 NET.eval()
 
 
+def _times_out(user_id: int, rate: float) -> bool:
+    """Deterministic per user, so a run replicates.
+
+    An unseeded random() here makes every replay a different experiment: the drill's own first
+    measurement of fail-open moved between -1.1% and -3.6% across runs, which is larger than
+    several of the effects the course teaches. Hashing the *user* (not the ranker row) also keeps
+    the timing population identical when other switches change it, so scenarios stay comparable.
+    """
+    if rate <= 0:
+        return False
+    h = int(hashlib.md5(str(user_id).encode()).hexdigest(), 16) % 10_000
+    return h < rate * 10_000
+
+
 class Req(BaseModel):
     ranker_row: int
     items: list[int]
+    user_id: int = -1
 
 
 class Resp(BaseModel):
@@ -50,7 +65,7 @@ def rank(req: Req) -> Resp:
     # A ranker that exceeds its budget is indistinguishable, to the orchestrator, from one that
     # is down. Returning 503 rather than sleeping keeps the drill's replay fast while producing
     # the same decision at the caller.
-    if cfg["ranker_timeout_rate"] and random.random() < float(cfg["ranker_timeout_rate"]):
+    if _times_out(req.user_id, float(cfg["ranker_timeout_rate"])):
         raise HTTPException(status_code=503, detail="ranker budget exceeded")
 
     if not req.items:

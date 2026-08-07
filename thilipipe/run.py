@@ -47,6 +47,40 @@ def start(wait: float = 40.0) -> None:
     print(f"up: {', '.join(n for n, _, _ in SERVICES)}")
 
 
+def is_up() -> bool:
+    """True when the orchestrator answers. Cheap enough to call at the top of every lesson."""
+    try:
+        return httpx.get("http://127.0.0.1:8800/health", timeout=2.0).status_code == 200
+    except Exception:                                             # noqa: BLE001
+        return False
+
+
+def ensure(wait: float = 40.0) -> None:
+    """Start the services only if they are not already running.
+
+    Lessons are opened out of order and re-run repeatedly, so `start()` at the top of every
+    notebook would kill a system the previous cell was using. This is the idempotent version.
+    """
+    if is_up():
+        print("already up")
+        return
+    start(wait=wait)
+
+
+def ensure_bootstrapped() -> None:
+    """Train the artifacts if they are missing. Roughly two minutes on CPU, once."""
+    from .state import state_dir
+
+    needed = ["item_vectors.npy", "item_vectors_stale.npy", "ranker.pt",
+              "train_mask.npy", "test_mask.npy", "offline_recs.json", "meta.json"]
+    missing = [f for f in needed if not (state_dir() / f).exists()]
+    if not missing:
+        print("artifacts present")
+        return
+    print(f"missing {len(missing)} artifact(s) — training (~2 min)")
+    subprocess.run([sys.executable, "-m", "thilipipe.bootstrap"], check=True)
+
+
 def stop() -> None:
     for p in _procs:
         p.terminate()
