@@ -38,7 +38,7 @@ scratch in minutes, so this runs in a fresh container whether or not you did the
 ## Quickstart
 
 ```bash
-pip install -e .                       # plus thilirec and thilitower
+pip install -e .                       # also installs thilirec and thilitower from GitHub
 python -m thilipipe.bootstrap          # trains, ~2 min on CPU, writes state/
 python -m thilipipe.run &              # five services on 127.0.0.1:8800-8804
 python -m thilipipe.harness --users 800
